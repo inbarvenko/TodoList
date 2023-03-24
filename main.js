@@ -1,17 +1,14 @@
-// Отображение количества активных задач.
-// Фильтрация задач: все, только выполненные, только не выполненные.
 // Редактирование задач.
-// Сохранение задач и состояния фильтра при перезагрузке.
 
 // -- проверить на поле из пробелов
 // -- придумать лучший способ получать обхект из toDoList
-// -- сохранять стиль для текста done:true при перезагрузке (???)
-// -- число действующих тасков неправильное ->
-// при перезагрузке стр + сделанные таски = считает все, что есть 
+// -- в фильтре выполненых, если поставить на активную - не пропадет
 
 
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
+const selectFilter = document.getElementById('input_select');
+const containerList = document.getElementById('container__list');
 
 let toDoList_page = document.getElementById('todo');
 let toDoList = [];
@@ -25,19 +22,40 @@ const render = () => {
     toDoList = JSON.parse(localStorage.getItem('todo'));
     showToDo();
   };
+  if(localStorage.getItem('filter')) {
+    selectFilter.value = JSON.parse(localStorage.getItem('filter'));
+  }
+}
+
+const saveLocalStorage = () => {
+  localStorage.setItem('todo', JSON.stringify(toDoList));
+  localStorage.setItem('filter', JSON.stringify(selectFilter.value));
 }
 
 render();
 
 //---------------------------------------------------------
+addButton.addEventListener('click', addNewTask);
+textInput.addEventListener('keypress', addByEnter);
+containerList.addEventListener('click', containerEvent);
+selectFilter.addEventListener('change', filterTasks);
+//---------------------------------------------------------
+
 
 function currentTasks() {
-  const list = document.querySelector('.list__current');
-  const num = document.querySelector('.number');
-  if (num) {
-    num.innerHTML= toDoList.length - itemsDone;
-  }
-  else list.insertAdjacentHTML('beforeend', `<h2 id="number" class="number">${toDoList.length - itemsDone}</h2>`);
+  const num = document.getElementById('number');
+  let completed = 0;
+
+  const todos = toDoList_page.childNodes;
+  todos.forEach((todo) => {
+    if(todo.nodeName != "#text"){
+      if(todo.classList.contains("completed")) {
+        completed++;
+      }
+    }
+  });
+
+  num.innerHTML = toDoList.length - completed;
 }
 
 
@@ -45,9 +63,9 @@ function showToDo() {
   let strItem = '';
   toDoList.forEach((item, index) => {
     strItem += `
-        <li class="items__item">
+        <li class="items__item ${item.done ? 'completed' : ''}">
             <input id="item_${index}" type="checkbox" class="item__check" ${item.done ? 'checked' : ''}>
-            <p for="item_${index}" class="item__text">${item.task}</p>
+            <p for="item_${index}" class="item__text ${item.done ? 'taskDone' : ''}">${item.task}</p>
             <button class="item__delete-button">X</button>
         </li>
         `;
@@ -56,10 +74,7 @@ function showToDo() {
   currentTasks();
 }
 
-
-
-const addNewTask = () => {
-
+function addNewTask () {
   for (let item of toDoList) {
     if (item.task == textInput.value) {
       return;
@@ -75,20 +90,10 @@ const addNewTask = () => {
 
   toDoList.push(newTask);
   showToDo();
-  localStorage.setItem('todo', JSON.stringify(toDoList));
+  saveLocalStorage();
 }
 
-addButton.addEventListener('click', () => addNewTask());
-
-textInput.addEventListener('keypress', (event) => {
-  if (event.code == 'Enter' && textInput.value != '') {
-    addNewTask();
-  }
-});
-
-const containerList = document.querySelector('.container__list');
-
-const containerEvent = (event) => {
+function containerEvent (event) {
   switch (event.target.className) {
 
     case 'item__delete-button':
@@ -99,36 +104,82 @@ const containerEvent = (event) => {
 
       toDoList.pop({ task: value });
       currentTasks()
-      localStorage.setItem('todo', JSON.stringify(toDoList));
+     
       break;
 
     case 'item__check':
 
       let text = event.target.nextElementSibling;
+      let element = event.target.closest('.items__item')
 
-      let value_ch = event.target.nextElementSibling.innerHTML;
+      let value_ch = text.innerHTML;
       for (let item of toDoList) {
         if (item.task == value_ch && !item.done) {
           item.done = true;
-          text.className = 'item__text taskDone';
+          text.classList.add('taskDone');
+          element.classList.add('completed');
 
           itemsDone++;
         }
         else if (item.task == value_ch && item.done) {
           item.done = false;
-          text.className = 'item__text';
+          text.classList.remove('taskDone');
+          element.classList.remove('completed');
 
           itemsDone--;
         }
       }
 
       currentTasks();
-      localStorage.setItem('todo', JSON.stringify(toDoList));
+     
       break;
     default: return;
   }
+
+  saveLocalStorage();
 }
-containerList.addEventListener('click', containerEvent);
+
+function addByEnter (event){
+    if (event.code == 'Enter' && textInput.value != '') {
+      addNewTask();
+    }
+}
+
+function filterTasks (event) {
+  const todos = toDoList_page.childNodes;
+  todos.forEach((todo) => {
+    if(todo.nodeName != "#text"){
+      switch(event.target.value) {
+        case "all": 
+          todo.style.display = "flex";
+          break;
+        case "completed": 
+          if(todo.classList.contains("completed")) {
+            todo.style.display = "flex";
+          } 
+          else{
+            todo.style.display = "none";
+          }
+          break;
+        case "active":
+          if(!todo.classList.contains("completed")) {
+            todo.style.display = "flex";
+          }
+          else {
+            todo.style.display = "none";
+          }
+          break;
+      }
+    }
+  });
+
+  saveLocalStorage();
+}
+
+
+
+
+
 
 
 

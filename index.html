@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/TodoList/style.css">
+    <link rel="stylesheet" href="/style.css">
     <title>TODO List</title>
 </head>
 <body>
@@ -13,17 +13,22 @@
         <div class="container__input">
             <input id="input_text" type="text" class="input__text">
             <button id="add_button">Add</button>
+            <select class="input__filter" id="input_select">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+            </select>
         </div>
 
         <div class="list__current">
             <h3 class="current_text">How many tasks to do:</h3>
-            
+            <h2 id="number" class="number">0</h2>
         </div>
-        <div class="container__list">
+        <div class="container__list" id="container__list">
             <ul id="todo" class="list__items">
             </ul>
         </div>
     </div>
-    <script src="/TodoList/main.js"></script>
+    <script src="/main.js"></script>
 </body>
 </html>
