@@ -22,6 +22,7 @@ const render = () => {
   };
   if(localStorage.getItem('filter')) {
     selectFilter.value = JSON.parse(localStorage.getItem('filter'));
+    console.log(selectFilter.value);
     filterTasks();
   }
 }
@@ -71,7 +72,6 @@ function showToDo() {
     toDoList_page.innerHTML = strItem;
   });
   currentTasks();
-  filterTasks();
 }
 
 function addNewTask () {
@@ -90,6 +90,7 @@ function addNewTask () {
 
   toDoList.push(newTask);
   showToDo();
+  filterTasks();
   saveLocalStorage();
 }
 
@@ -103,8 +104,6 @@ function containerEvent (event) {
       const value = item.children[1].innerHTML;
 
       toDoList.pop({ task: value });
-      currentTasks()
-     
       break;
 
     case 'item__check':
@@ -129,14 +128,14 @@ function containerEvent (event) {
           itemsDone--;
         }
       }
-
-      currentTasks();
-     
+      
       break;
     default: return;
   }
-
+  
+  currentTasks();
   saveLocalStorage();
+  filterTasks();
 }
 
 function addByEnter (event){
