@@ -1,9 +1,7 @@
 // Редактирование задач.
 
 // -- проверить на поле из пробелов
-// -- придумать лучший способ получать обхект из toDoList
-// -- в фильтре выполненых, если поставить на активную - не пропадет
-
+// -- придумать лучший способ получать объект из toDoList
 
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
@@ -24,6 +22,7 @@ const render = () => {
   };
   if(localStorage.getItem('filter')) {
     selectFilter.value = JSON.parse(localStorage.getItem('filter'));
+    filterTasks();
   }
 }
 
@@ -72,6 +71,7 @@ function showToDo() {
     toDoList_page.innerHTML = strItem;
   });
   currentTasks();
+  filterTasks();
 }
 
 function addNewTask () {
@@ -145,11 +145,11 @@ function addByEnter (event){
     }
 }
 
-function filterTasks (event) {
+function filterTasks () {
   const todos = toDoList_page.childNodes;
   todos.forEach((todo) => {
     if(todo.nodeName != "#text"){
-      switch(event.target.value) {
+      switch(selectFilter.value) {
         case "all": 
           todo.style.display = "flex";
           break;
