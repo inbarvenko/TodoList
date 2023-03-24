@@ -138,7 +138,8 @@ function containerEvent (event) {
       
       break;
     case 'buttons__edit':
-      // event.target.closest('.items__item')
+      let textItem = event.target.closest('.item__buttons').previousElementSibling;
+      console.log(textItem);
       break;
     default: return;
   }
