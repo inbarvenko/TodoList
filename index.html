@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/TodoList/style.css">
     <title>TODO List</title>
 </head>
 <body>
     <div class="container">
-        <h2>Add Item</h2>
-        <input id="input_text" type="text">
-        <button id="add_button">Add</button>
+        <h2>TODO list</h2>
+        <div class="container__input">
+            <input id="input_text" type="text" class="input__text">
+            <button id="add_button">Add</button>
+        </div>
 
-        <div class="list">
-            <ul id="todo">
+        <div class="container__list">
+            <ul id="todo" class="list__items">
 
             </ul>
         </div>
     </div>
-    <script src="/main.js"></script>
+    <script src="/TodoList/main.js"></script>
 </body>
 </html>
