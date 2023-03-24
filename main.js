@@ -29,20 +29,20 @@ class EventList {
 }
 
 
-
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
 
 let toDoList_page = document.getElementById('todo');
 let toDoList = [];
+let itemsDone = 0;
 
 const currentTasks = () => {
   const list = document.querySelector('.list__current');
   const num = document.querySelector('.number');
   if (num) {
-    num.innerHTML= toDoList.length;
+    num.innerHTML= toDoList.length - itemsDone;
   }
-  else list.insertAdjacentHTML('beforeend', `<h2 class="number">${toDoList.length}</h2>`);
+  else list.insertAdjacentHTML('beforeend', `<h2 class="number">${toDoList.length - itemsDone}</h2>`);
 }
 
 
@@ -119,18 +119,22 @@ const containerEvent = (event) => {
       for (let item of toDoList) {
         if (item.task == value_ch && !item.done) {
           item.done = true;
-
           text.style.cssText = `
-                        color: grey;
-                        text-decoration: line-through;
-                    `;
+            color: grey;
+            text-decoration: line-through;
+          `;
+
+          itemsDone++;
         }
         else if (item.task == value_ch && item.done) {
           item.done = false;
           text.style.cssText = '';
+
+          itemsDone--;
         }
       }
 
+      currentTasks();
       localStorage.setItem('todo', JSON.stringify(toDoList));
       break;
     default: return;
