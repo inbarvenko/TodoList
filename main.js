@@ -1,10 +1,15 @@
+// Отображение количества активных задач.
+// Фильтрация задач: все, только выполненные, только не выполненные.
+// Редактирование задач.
+// Сохранение задач и состояния фильтра при перезагрузке.
+
+
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
 
 let toDoList_page = document.getElementById('todo');
 
 let toDoList = [];
-
 
 const showToDo = () => {
     let strItem = '';
@@ -21,7 +26,6 @@ const showToDo = () => {
 }
 
 // -- LocalStorage для сохранение инфы на локал сервере
-localStorage.setItem('todo', JSON.stringify(toDoList));
 if(localStorage.getItem('todo')){
     toDoList = JSON.parse(localStorage.getItem('todo'));
     showToDo();
@@ -37,6 +41,7 @@ const addNewTask = () => {
 
     toDoList.push(newTask);
     showToDo();
+    localStorage.setItem('todo', JSON.stringify(toDoList));
 }
 
 addButton.addEventListener('click', () => addNewTask());
@@ -48,16 +53,46 @@ textInput.addEventListener('keypress', (event) => {
     }
 });
 
-
 const containerList = document.querySelector('.container__list');
 
 containerList.addEventListener('click', (event) => {
-    if (event.target.className != 'item__delete-button') return;
+    switch(event.target.className){
 
-    let item = event.target.closest('.items__item');
-    item.remove();
+        case 'item__delete-button': 
+            let item = event.target.closest('.items__item');
+            item.remove();
 
-    const value = item.children[1].innerHTML;
-    
-    toDoList.pop({task: value});
+            const value = item.children[1].innerHTML;
+            
+            toDoList.pop({task: value});
+            localStorage.setItem('todo', JSON.stringify(toDoList));
+            break;
+
+        case 'item__check':
+            
+            // --придумать лучший способ получать обхект из toDoList
+            // -- сохранять стиль для текста при перезагрузке (???) 
+
+            let text = event.target.nextElementSibling;
+
+            let value_ch = event.target.nextElementSibling.innerHTML;
+            for(let item of toDoList){ 
+                if(item.task == value_ch && !item.done){
+                    item.done = true;
+
+                    text.style.cssText = `
+                        color: grey;
+                        text-decoration: line-through;
+                    `;
+                }
+                else if (item.task == value_ch && item.done){
+                    item.done = false;
+                    text.style.cssText = '';
+                }
+            }
+
+            localStorage.setItem('todo', JSON.stringify(toDoList));
+            break;
+        default: return;
+    }
 });
