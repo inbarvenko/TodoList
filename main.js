@@ -3,30 +3,11 @@
 // Редактирование задач.
 // Сохранение задач и состояния фильтра при перезагрузке.
 
-// -- вынести сохранение в отдельные функции
 // -- проверить на поле из пробелов
 // -- придумать лучший способ получать обхект из toDoList
-// -- сохранять стиль для текста при перезагрузке (???) 
-
-
-class EventList {
-  listeners = [];
-
-  subscribe(cb) {
-    if (this.listeners.includes(cb)) { return }
-    this.listeners.push(cb)
-  }
-
-  notify(state) {
-    this.listeners.forEach((listener) => {
-      listener(state);
-    })
-  }
-
-  remove(cb) {
-    this.listeners = this.listeners.filter((listener) => listener !== cb);
-  }
-}
+// -- сохранять стиль для текста done:true при перезагрузке (???)
+// -- число действующих тасков неправильное ->
+// при перезагрузке стр + сделанные таски = считает все, что есть 
 
 
 const textInput = document.getElementById('input_text');
@@ -36,17 +17,31 @@ let toDoList_page = document.getElementById('todo');
 let toDoList = [];
 let itemsDone = 0;
 
-const currentTasks = () => {
+
+//---------------------------------------------------------
+const render = () => {
+  //  LocalStorage для сохранение инфы на локал сервере
+  if (localStorage.getItem('todo')) {
+    toDoList = JSON.parse(localStorage.getItem('todo'));
+    showToDo();
+  };
+}
+
+render();
+
+//---------------------------------------------------------
+
+function currentTasks() {
   const list = document.querySelector('.list__current');
   const num = document.querySelector('.number');
   if (num) {
     num.innerHTML= toDoList.length - itemsDone;
   }
-  else list.insertAdjacentHTML('beforeend', `<h2 class="number">${toDoList.length - itemsDone}</h2>`);
+  else list.insertAdjacentHTML('beforeend', `<h2 id="number" class="number">${toDoList.length - itemsDone}</h2>`);
 }
 
 
-const showToDo = () => {
+function showToDo() {
   let strItem = '';
   toDoList.forEach((item, index) => {
     strItem += `
@@ -61,11 +56,7 @@ const showToDo = () => {
   currentTasks();
 }
 
-//  LocalStorage для сохранение инфы на локал сервере
-if (localStorage.getItem('todo')) {
-  toDoList = JSON.parse(localStorage.getItem('todo'));
-  showToDo();
-};
+
 
 const addNewTask = () => {
 
@@ -119,16 +110,13 @@ const containerEvent = (event) => {
       for (let item of toDoList) {
         if (item.task == value_ch && !item.done) {
           item.done = true;
-          text.style.cssText = `
-            color: grey;
-            text-decoration: line-through;
-          `;
+          text.className = 'item__text taskDone';
 
           itemsDone++;
         }
         else if (item.task == value_ch && item.done) {
           item.done = false;
-          text.style.cssText = '';
+          text.className = 'item__text';
 
           itemsDone--;
         }
@@ -141,3 +129,24 @@ const containerEvent = (event) => {
   }
 }
 containerList.addEventListener('click', containerEvent);
+
+
+
+class EventList {
+  listeners = [];
+
+  subscribe(cb) {
+    if (this.listeners.includes(cb)) { return }
+    this.listeners.push(cb)
+  }
+
+  notify(state) {
+    this.listeners.forEach((listener) => {
+      listener(state);
+    })
+  }
+
+  remove(cb) {
+    this.listeners = this.listeners.filter((listener) => listener !== cb);
+  }
+}

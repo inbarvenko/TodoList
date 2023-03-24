@@ -101,3 +101,8 @@ button {
 .number {
   color: darkcyan;
 }
+
+.taskDone {
+  color: grey;
+  text-decoration: line-through;
+}
