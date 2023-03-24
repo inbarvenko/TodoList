@@ -3,6 +3,11 @@
 // Редактирование задач.
 // Сохранение задач и состояния фильтра при перезагрузке.
 
+// -- вынести сохранение в отдельные функции
+// -- проверить на поле из пробелов
+// -- придумать лучший способ получать обхект из toDoList
+// -- сохранять стиль для текста при перезагрузке (???) 
+
 
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
@@ -25,14 +30,19 @@ const showToDo = () => {
     });
 }
 
-// -- LocalStorage для сохранение инфы на локал сервере
+//  LocalStorage для сохранение инфы на локал сервере
 if(localStorage.getItem('todo')){
     toDoList = JSON.parse(localStorage.getItem('todo'));
     showToDo();
 };
 
 const addNewTask = () => {
-    // -- проверка на сущестование такого таска
+
+    for(let item of toDoList){
+        if(item.task == textInput.value){
+            return ;
+        }
+    }
 
     let newTask = {
         task: textInput.value,
@@ -47,7 +57,6 @@ const addNewTask = () => {
 addButton.addEventListener('click', () => addNewTask());
 
 textInput.addEventListener('keypress', (event) => {
-    // -- проверить на поле из пробелов
     if(event.code == 'Enter' && textInput.value != ''){
         addNewTask();
     }
@@ -69,9 +78,6 @@ containerList.addEventListener('click', (event) => {
             break;
 
         case 'item__check':
-            
-            // --придумать лучший способ получать обхект из toDoList
-            // -- сохранять стиль для текста при перезагрузке (???) 
 
             let text = event.target.nextElementSibling;
 
