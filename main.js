@@ -22,7 +22,6 @@ const render = () => {
   };
   if(localStorage.getItem('filter')) {
     selectFilter.value = JSON.parse(localStorage.getItem('filter'));
-    console.log(selectFilter.value);
     filterTasks();
   }
 }
@@ -66,7 +65,10 @@ function showToDo() {
         <li class="items__item ${item.done ? 'completed' : ''}">
             <input id="item_${index}" type="checkbox" class="item__check" ${item.done ? 'checked' : ''}>
             <p for="item_${index}" class="item__text ${item.done ? 'taskDone' : ''}">${item.task}</p>
-            <button class="item__delete-button">X</button>
+            <div class="item__buttons">
+              <button class="buttons__edit">Edit</button>
+              <button class="buttons__delete">X</button>
+            </div>
         </li>
         `;
     toDoList_page.innerHTML = strItem;
@@ -97,13 +99,18 @@ function addNewTask () {
 function containerEvent (event) {
   switch (event.target.className) {
 
-    case 'item__delete-button':
+    case 'buttons__delete':
       let item = event.target.closest('.items__item');
       item.remove();
 
       const value = item.children[1].innerHTML;
 
-      toDoList.pop({ task: value });
+      for (let i = 0; i < toDoList.length; i++) {
+        if (toDoList[i].task == value){
+          toDoList.splice(i,1);
+        }
+      }
+
       break;
 
     case 'item__check':
@@ -130,9 +137,12 @@ function containerEvent (event) {
       }
       
       break;
+    case 'buttons__edit':
+      // event.target.closest('.items__item')
+      break;
     default: return;
   }
-  
+
   currentTasks();
   saveLocalStorage();
   filterTasks();
@@ -175,7 +185,9 @@ function filterTasks () {
   saveLocalStorage();
 }
 
+function editTask () {
 
+}
 
 
 

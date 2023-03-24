@@ -88,18 +88,28 @@ button {
   justify-content: space-between;
 }
 
-.item__delete-button {
+.item__check {
+  width: 5vw;
+  height: 25px;
+}
+
+.item__buttons {
+  display: flex;
+  
+}
+
+.buttons__edit {
+  width: 10vw;
+  height: 25px;
+}
+
+.buttons__delete {
   color: red;
 
   font-family:'Montserrat', sans-serif;
   font-weight: 500;
   font-size: 15px;
 
-  width: 5vw;
-  height: 25px;
-}
-
-.item__check {
   width: 5vw;
   height: 25px;
 }
