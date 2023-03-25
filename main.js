@@ -1,16 +1,18 @@
-// Редактирование задач.
-
-// -- проверить на поле из пробелов
 // -- придумать лучший способ получать объект из toDoList
+// -- если после редактирования задачи пользователь введет уже существующую - 
+// - ошибка сохранения, добавить проверку 
 
 const textInput = document.getElementById('input_text');
 const addButton = document.getElementById('add_button');
 const selectFilter = document.getElementById('input_select');
 const containerList = document.getElementById('container__list');
 
+
 let toDoList_page = document.getElementById('todo');
 let toDoList = [];
 let itemsDone = 0;
+let copyItem = '';
+let flag = false;
 
 
 //---------------------------------------------------------
@@ -40,6 +42,15 @@ containerList.addEventListener('click', containerEvent);
 selectFilter.addEventListener('change', filterTasks);
 //---------------------------------------------------------
 
+const checkNullStr = (str) => {
+  const pattern = /^[\s]+$/;
+
+  if (pattern.test(str)){
+    return true;
+  }
+
+  return false;
+}
 
 function currentTasks() {
   const num = document.getElementById('number');
@@ -83,7 +94,7 @@ function addNewTask () {
     }
   }
 
-  if (textInput.value == '') return;
+  if (textInput.value == '' || checkNullStr(textInput.value)) return;
 
   let newTask = {
     task: textInput.value,
@@ -93,6 +104,28 @@ function addNewTask () {
   toDoList.push(newTask);
   showToDo();
   filterTasks();
+  textInput.value = '';
+  saveLocalStorage();
+}
+
+const editReturn = (item) => {
+  let inputEdit = document.getElementById('input_edit').value;
+
+  for (let i = 0; i < toDoList.length; i++) {
+    if (toDoList[i].task == copyItem.innerHTML){
+      toDoList[i].task = inputEdit;
+    }
+  }
+    copyItem.innerHTML = inputEdit;
+    item.replaceWith(copyItem);
+    flag = false;
+}
+
+const editReturnEnter = (event) => {
+  if (event.code == 'Enter' ) {
+    editReturn(event.target.closest('.item__text'));
+  }
+
   saveLocalStorage();
 }
 
@@ -119,6 +152,7 @@ function containerEvent (event) {
       let element = event.target.closest('.items__item')
 
       let value_ch = text.innerHTML;
+
       for (let item of toDoList) {
         if (item.task == value_ch && !item.done) {
           item.done = true;
@@ -138,12 +172,25 @@ function containerEvent (event) {
       
       break;
     case 'buttons__edit':
+
       let textItem = event.target.closest('.item__buttons').previousElementSibling;
-      console.log(textItem);
+
+      if(!flag){
+        flag = true;
+
+        copyItem = textItem.cloneNode(true);
+        
+        textItem.innerHTML = `<input id="input_edit" type="text" class="input_edit">`;
+
+        textItem.addEventListener('keypress', editReturnEnter);
+      }
+      else{
+        textItem.removeEventListener('keypress', editReturnEnter);
+        editReturn(textItem);
+      }
       break;
     default: return;
   }
-
   currentTasks();
   saveLocalStorage();
   filterTasks();
@@ -184,10 +231,6 @@ function filterTasks () {
   });
 
   saveLocalStorage();
-}
-
-function editTask () {
-
 }
 
 
