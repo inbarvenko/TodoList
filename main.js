@@ -111,6 +111,15 @@ function addNewTask () {
 const editReturn = (item) => {
   let inputEdit = document.getElementById('input_edit').value;
 
+  if(inputEdit == '' || checkNullStr(inputEdit)){
+    return;
+  }
+
+  for (let i = 0; i < toDoList.length; i++) {
+    if(inputEdit == toDoList[i].task){
+      return;
+    }
+  }
   for (let i = 0; i < toDoList.length; i++) {
     if (toDoList[i].task == copyItem.innerHTML){
       toDoList[i].task = inputEdit;
@@ -119,13 +128,14 @@ const editReturn = (item) => {
     copyItem.innerHTML = inputEdit;
     item.replaceWith(copyItem);
     flag = false;
+    saveLocalStorage();
+
 }
 
 const editReturnEnter = (event) => {
   if (event.code == 'Enter' ) {
     editReturn(event.target.closest('.item__text'));
   }
-
   saveLocalStorage();
 }
 
@@ -144,6 +154,7 @@ function containerEvent (event) {
         }
       }
 
+      saveLocalStorage();
       break;
 
     case 'item__check':
@@ -169,7 +180,7 @@ function containerEvent (event) {
           itemsDone--;
         }
       }
-      
+      saveLocalStorage();
       break;
     case 'buttons__edit':
 
@@ -192,7 +203,6 @@ function containerEvent (event) {
     default: return;
   }
   currentTasks();
-  saveLocalStorage();
   filterTasks();
 }
 
