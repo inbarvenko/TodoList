@@ -57,7 +57,8 @@ function currentTasks() {
 }
 
 
-function showToDo(e) {
+function showToDo() {
+  toDoList_Page.innerHTML = null;
   toDoList.forEach((item, index) => {
     item.id = index;
 
@@ -92,7 +93,7 @@ function showToDo(e) {
     liElement.prepend(itemText);
     liElement.prepend(itemInput);
 
-    toDoList_Page.replaceWith(liElement);
+    toDoList_Page.append(liElement);
 
 
     // editButton.addEventListener('click', (e) => {
@@ -103,7 +104,7 @@ function showToDo(e) {
   currentTasks();
 }
 
-function addNewTask (e) {
+function addNewTask () {
 
   if (checkNullStr(textInput.value)) return;
   let newTask = {
@@ -114,10 +115,9 @@ function addNewTask (e) {
   };
 
   toDoList.push(newTask);
-  showToDo(e);
+  showToDo();
   filterTasks();
   textInput.value = '';
-  // saveLocalStorage();
 }
 
 const editReturn = (item) => {
