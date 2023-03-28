@@ -1,17 +1,12 @@
-// -- придумать лучший способ получать объект из toDoList
-// -- если после редактирования задачи пользователь введет уже существующую - 
-// - ошибка сохранения, добавить проверку 
+// -- не сохраняется состояние фильтра
 
-const textInput = document.getElementById('input_text');
-const addButton = document.getElementById('add_button');
 const selectFilter = document.getElementById('input_select');
 const containerList = document.getElementById('container__list');
-
+const textInput = document.getElementById('input_text');
+const addButton = document.getElementById('add_button');
 
 let toDoList_Page = document.getElementById('todo');
 let toDoList = [];
-let copyItem = '';
-let flag = false;
 
 
 //---------------------------------------------------------
@@ -32,17 +27,17 @@ const saveLocalStorage = () => {
   localStorage.setItem('filter', JSON.stringify(selectFilter.value));
 }
 
-// render();
+render();
 
 //---------------------------------------------------------
 addButton.addEventListener('click', addNewTask);
-// textInput.addEventListener('keypress', addByEnter);
-// containerList.addEventListener('click', containerEvent);
-// selectFilter.addEventListener('change', filterTasks);
+textInput.addEventListener('keypress', addByEnter);
+selectFilter.addEventListener('change', filterTasks);
 //---------------------------------------------------------
 
-const checkNullStr = (str) => {
-  return !str.trim();
+const withoutSpacesStr = (str) => {
+  str = str.trim();
+  return str;
 }
 
 function currentTasks() {
@@ -56,12 +51,93 @@ function currentTasks() {
   num.innerHTML = active;
 }
 
+function addNewTask () {
+  const str = withoutSpacesStr(textInput.value);
+  if (!str) return;
+  let newTask = {
+    task: str,
+    done: false,
+    edit: false,
+    id: ''
+  };
+
+  toDoList.push(newTask);
+  filterTasks();
+  textInput.value = '';
+}
+
+function addByEnter (event){
+  if (event.code == 'Enter' && withoutSpacesStr(textInput.value)) {
+    addNewTask();
+  }
+}
+
+function removeTask(id) {
+  toDoList.forEach((item) => {
+    if(item.id == id) {
+      toDoList.splice(id,1);
+    }
+  });
+
+  filterTasks();
+}
+
+function editTask(id) {
+  toDoList.forEach((item) => {
+    if(item.id == id) {
+      item.edit = !item.edit;
+    }
+  });
+
+  filterTasks();
+}
+
+function completeTask (id) {
+  toDoList.forEach((item) => {
+    if(item.id == id) {
+      item.done = !item.done;
+    }
+  });
+
+  filterTasks();
+}
+
+function itemTextChange (item) {
+  let itemText;
+    if(item.edit){ 
+      itemText = document.createElement('input');
+      itemText.value = item.task;
+
+      itemText.addEventListener('input', (event) => {
+        const str = withoutSpacesStr(event.target.value);
+
+        if(str){
+          item.task = str;
+        }
+      });
+
+      itemText.addEventListener('keypress', (event) => {
+        if (event.code == 'Enter') {
+          item.edit = !item.edit;
+          showToDo();
+        }
+      });
+
+    }
+    else{
+      itemText = document.createElement('p');
+      itemText.innerHTML = item.task;
+      itemText.classList.add('item__text');
+    }
+
+    return itemText;
+};
 
 function showToDo() {
   toDoList_Page.innerHTML = null;
   toDoList.forEach((item, index) => {
     item.id = index;
-
+    
     const editButton = document.createElement('button');
     editButton.classList.add('buttons__edit');
     editButton.innerHTML = 'Edit';
@@ -74,10 +150,8 @@ function showToDo() {
     itemButtons.prepend(editButton);
     itemButtons.prepend(deleteButton);
 
-    const itemText = document.createElement('p');
-    itemText.innerHTML = item.task;
-    itemText.classList.add('item__text');
-
+    const itemText = itemTextChange(item);
+    
     const itemInput = document.createElement('input');
     itemInput.type = 'checkbox';
     itemInput.classList.add('item__check');
@@ -96,157 +170,133 @@ function showToDo() {
     toDoList_Page.append(liElement);
 
 
-    // editButton.addEventListener('click', (e) => {
-    //   ////
-    //   remove(item.id)
-    // })
+    deleteButton.addEventListener('click', () => {
+      removeTask(item.id);
+    });
+
+    editButton.addEventListener('click', () => {
+      editTask(item.id);
+    });
+
+    itemInput.addEventListener('change', () => {
+      completeTask(item.id);
+    });
+
   });
-  currentTasks();
-}
-
-function addNewTask () {
-
-  if (checkNullStr(textInput.value)) return;
-  let newTask = {
-    task: textInput.value,
-    done: false,
-    edit: false,
-    id: ''
-  };
-
-  toDoList.push(newTask);
-  showToDo();
-  filterTasks();
-  textInput.value = '';
-}
-
-const editReturn = (item) => {
-  let inputEdit = document.getElementById('input_edit').value;
-
-  if(inputEdit == '' || checkNullStr(inputEdit)){
-    return;
-  }
-
-  for (let i = 0; i < toDoList.length; i++) {
-    if(inputEdit == toDoList[i].task){
-      return;
-    }
-  }
-  for (let i = 0; i < toDoList.length; i++) {
-    if (toDoList[i].task == copyItem.innerHTML){
-      toDoList[i].task = inputEdit;
-    }
-  }
-    copyItem.innerHTML = inputEdit;
-    item.replaceWith(copyItem);
-    flag = false;
-    saveLocalStorage();
-
-}
-
-const editReturnEnter = (event) => {
-  if (event.code == 'Enter' ) {
-    editReturn(event.target.closest('.item__text'));
-  }
+  
   saveLocalStorage();
-}
-
-function containerEvent (event) {
-  switch (event.target.className) {
-
-    case 'buttons__delete':
-      let item = event.target.closest('.items__item');
-      item.remove();
-
-      const value = item.children[1].innerHTML;
-
-      for (let i = 0; i < toDoList.length; i++) {
-        if (toDoList[i].task == value){
-          toDoList.splice(i,1);
-        }
-      }
-
-      saveLocalStorage();
-      break;
-
-    case 'item__check':
-
-      let text = event.target.nextElementSibling;
-      let element = event.target.closest('.items__item')
-
-      let value_ch = text.innerHTML;
-
-      for (let item of toDoList) {
-        if (item.task == value_ch && !item.done) {
-          item.done = true;
-          text.classList.add('taskDone');
-          element.classList.add('completed');
-        }
-        else if (item.task == value_ch && item.done) {
-          item.done = false;
-          text.classList.remove('taskDone');
-          element.classList.remove('completed');
-        }
-      }
-      saveLocalStorage();
-      break;
-    case 'buttons__edit':
-
-      let textItem = event.target.closest('.item__buttons').previousElementSibling;
-
-      if(!flag){
-        flag = true;
-
-        copyItem = textItem.cloneNode(true);
-        
-        textItem.innerHTML = `<input id="input_edit" type="text" class="input_edit">`;
-
-        textItem.addEventListener('keypress', editReturnEnter);
-      }
-      else{
-        textItem.removeEventListener('keypress', editReturnEnter);
-        editReturn(textItem);
-      }
-      break;
-    default: return;
-  }
   currentTasks();
-  filterTasks();
 }
 
-function addByEnter (event){
-    if (event.code == 'Enter' && textInput.value != '') {
-      addNewTask();
+const showCompleted = () => {
+  toDoList_Page.innerHTML = null;
+
+  toDoList.forEach((item) => {
+    if(item.done){
+    
+      const editButton = document.createElement('button');
+      editButton.classList.add('buttons__edit');
+      editButton.innerHTML = 'Edit';
+      const deleteButton = document.createElement('button');
+      deleteButton.innerHTML = 'X';
+      deleteButton.classList.add('buttons__delete');
+
+      const itemButtons = document.createElement('div');
+      itemButtons.classList.add('item__buttons');
+      itemButtons.prepend(editButton);
+      itemButtons.prepend(deleteButton);
+
+      const itemText = itemTextChange(item);
+      
+      const itemInput = document.createElement('input');
+      itemInput.type = 'checkbox';
+      itemInput.classList.add('item__check');
+
+      itemText.classList.add('taskDone');
+      itemInput.checked = true;
+
+      const liElement = document.createElement('li');
+      liElement.classList.add('items__item');
+      liElement.prepend(itemButtons);
+      liElement.prepend(itemText);
+      liElement.prepend(itemInput);
+
+      toDoList_Page.append(liElement);
+
+      deleteButton.addEventListener('click', () => {
+        removeTask(item.id);
+      });
+  
+      editButton.addEventListener('click', () => {
+        editTask(item.id);
+      });
+  
+      itemInput.addEventListener('change', () => {
+        completeTask(item.id);
+      });
     }
+  });
+}
+
+const showActive = () => {
+  toDoList_Page.innerHTML = null;
+
+  toDoList.forEach((item) => {
+    if(!item.done){
+    
+      const editButton = document.createElement('button');
+      editButton.classList.add('buttons__edit');
+      editButton.innerHTML = 'Edit';
+      const deleteButton = document.createElement('button');
+      deleteButton.innerHTML = 'X';
+      deleteButton.classList.add('buttons__delete');
+
+      const itemButtons = document.createElement('div');
+      itemButtons.classList.add('item__buttons');
+      itemButtons.prepend(editButton);
+      itemButtons.prepend(deleteButton);
+
+      const itemText = itemTextChange(item);
+      
+      const itemInput = document.createElement('input');
+      itemInput.type = 'checkbox';
+      itemInput.classList.add('item__check');
+
+      const liElement = document.createElement('li');
+      liElement.classList.add('items__item');
+      liElement.prepend(itemButtons);
+      liElement.prepend(itemText);
+      liElement.prepend(itemInput);
+
+      toDoList_Page.append(liElement);
+
+      deleteButton.addEventListener('click', () => {
+        removeTask(item.id);
+      });
+  
+      editButton.addEventListener('click', () => {
+        editTask(item.id);
+      });
+  
+      itemInput.addEventListener('change', () => {
+        completeTask(item.id);
+      });
+    }
+  });
 }
 
 function filterTasks () {
-  const todos = toDoList_Page.childNodes;
-  todos.forEach((todo) => {
-    if(todo.nodeName != "#text"){
-      switch(selectFilter.value) {
-        case "all": 
-          todo.style.display = "flex";
-          break;
-        case "completed": 
-          if(todo.classList.contains("completed")) {
-            todo.style.display = "flex";
-          } 
-          else{
-            todo.style.display = "none";
-          }
-          break;
-        case "active":
-          if(!todo.classList.contains("completed")) {
-            todo.style.display = "flex";
-          }
-          else {
-            todo.style.display = "none";
-          }
-          break;
-      }
-    }
-  });
-
   saveLocalStorage();
+
+  switch(selectFilter.value) {
+    case "all": 
+      showToDo();
+      break;
+    case "completed": 
+      showCompleted();
+      break;
+    case "active":
+      showActive();
+      break;
+  }
 }
