@@ -8,9 +8,8 @@ const selectFilter = document.getElementById('input_select');
 const containerList = document.getElementById('container__list');
 
 
-let toDoList_page = document.getElementById('todo');
+let toDoList_Page = document.getElementById('todo');
 let toDoList = [];
-let itemsDone = 0;
 let copyItem = '';
 let flag = false;
 
@@ -33,79 +32,92 @@ const saveLocalStorage = () => {
   localStorage.setItem('filter', JSON.stringify(selectFilter.value));
 }
 
-render();
+// render();
 
 //---------------------------------------------------------
 addButton.addEventListener('click', addNewTask);
-textInput.addEventListener('keypress', addByEnter);
-containerList.addEventListener('click', containerEvent);
-selectFilter.addEventListener('change', filterTasks);
+// textInput.addEventListener('keypress', addByEnter);
+// containerList.addEventListener('click', containerEvent);
+// selectFilter.addEventListener('change', filterTasks);
 //---------------------------------------------------------
 
 const checkNullStr = (str) => {
-  const pattern = /^[\s]+$/;
-
-  if (pattern.test(str)){
-    return true;
-  }
-
-  return false;
+  return !str.trim();
 }
 
 function currentTasks() {
   const num = document.getElementById('number');
-  let completed = 0;
+  let active = 0;
+  
+  toDoList.forEach((item) => {
+    if(!item.done) active++;
+  })
 
-  const todos = toDoList_page.childNodes;
-  todos.forEach((todo) => {
-    if(todo.nodeName != "#text"){
-      if(todo.classList.contains("completed")) {
-        completed++;
-      }
-    }
-  });
-
-  num.innerHTML = toDoList.length - completed;
+  num.innerHTML = active;
 }
 
 
-function showToDo() {
-  let strItem = '';
+function showToDo(e) {
   toDoList.forEach((item, index) => {
-    strItem += `
-        <li class="items__item ${item.done ? 'completed' : ''}">
-            <input id="item_${index}" type="checkbox" class="item__check" ${item.done ? 'checked' : ''}>
-            <p for="item_${index}" class="item__text ${item.done ? 'taskDone' : ''}">${item.task}</p>
-            <div class="item__buttons">
-              <button class="buttons__edit">Edit</button>
-              <button class="buttons__delete">X</button>
-            </div>
-        </li>
-        `;
-    toDoList_page.innerHTML = strItem;
+    item.id = index;
+
+    const editButton = document.createElement('button');
+    editButton.classList.add('buttons__edit');
+    editButton.innerHTML = 'Edit';
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'X';
+    deleteButton.classList.add('buttons__delete');
+
+    const itemButtons = document.createElement('div');
+    itemButtons.classList.add('item__buttons');
+    itemButtons.prepend(editButton);
+    itemButtons.prepend(deleteButton);
+
+    const itemText = document.createElement('p');
+    itemText.innerHTML = item.task;
+    itemText.classList.add('item__text');
+
+    const itemInput = document.createElement('input');
+    itemInput.type = 'checkbox';
+    itemInput.classList.add('item__check');
+
+    if(item.done){
+      itemText.classList.add('taskDone');
+      itemInput.checked = true;
+    }
+
+    const liElement = document.createElement('li');
+    liElement.classList.add('items__item');
+    liElement.prepend(itemButtons);
+    liElement.prepend(itemText);
+    liElement.prepend(itemInput);
+
+    toDoList_Page.replaceWith(liElement);
+
+
+    // editButton.addEventListener('click', (e) => {
+    //   ////
+    //   remove(item.id)
+    // })
   });
   currentTasks();
 }
 
-function addNewTask () {
-  for (let item of toDoList) {
-    if (item.task == textInput.value) {
-      return;
-    }
-  }
+function addNewTask (e) {
 
-  if (textInput.value == '' || checkNullStr(textInput.value)) return;
-
+  if (checkNullStr(textInput.value)) return;
   let newTask = {
     task: textInput.value,
-    done: false
+    done: false,
+    edit: false,
+    id: ''
   };
 
   toDoList.push(newTask);
-  showToDo();
+  showToDo(e);
   filterTasks();
   textInput.value = '';
-  saveLocalStorage();
+  // saveLocalStorage();
 }
 
 const editReturn = (item) => {
@@ -169,15 +181,11 @@ function containerEvent (event) {
           item.done = true;
           text.classList.add('taskDone');
           element.classList.add('completed');
-
-          itemsDone++;
         }
         else if (item.task == value_ch && item.done) {
           item.done = false;
           text.classList.remove('taskDone');
           element.classList.remove('completed');
-
-          itemsDone--;
         }
       }
       saveLocalStorage();
@@ -213,7 +221,7 @@ function addByEnter (event){
 }
 
 function filterTasks () {
-  const todos = toDoList_page.childNodes;
+  const todos = toDoList_Page.childNodes;
   todos.forEach((todo) => {
     if(todo.nodeName != "#text"){
       switch(selectFilter.value) {
