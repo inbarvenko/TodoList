@@ -242,27 +242,3 @@ function filterTasks () {
 
   saveLocalStorage();
 }
-
-
-
-
-
-
-class EventList {
-  listeners = [];
-
-  subscribe(cb) {
-    if (this.listeners.includes(cb)) { return }
-    this.listeners.push(cb)
-  }
-
-  notify(state) {
-    this.listeners.forEach((listener) => {
-      listener(state);
-    })
-  }
-
-  remove(cb) {
-    this.listeners = this.listeners.filter((listener) => listener !== cb);
-  }
-}
