@@ -104,10 +104,23 @@ function completeTask (id) {
   filterTasks();
 }
 
+function mouseOutInput (event) {
+  if(!event.target.classList.contains('Edit')){
+    toDoList.forEach((item) => {
+      if(item.edit){
+        editTask(item.id);
+      }
+    });
+
+    document.removeEventListener('mousedown', mouseOutInput);
+  }
+}
+
 function itemTextChange (item) {
   let itemText;
     if(item.edit){ 
       itemText = document.createElement('input');
+      itemText.classList.add('Edit');
       itemText.value = item.task;
 
       itemText.addEventListener('input', (event) => {
@@ -120,10 +133,11 @@ function itemTextChange (item) {
 
       itemText.addEventListener('keypress', (event) => {
         if (event.code == 'Enter') {
-          item.edit = !item.edit;
-          showToDo();
+          editTask(item.id);
         }
       });
+
+      document.addEventListener('mousedown', mouseOutInput);
 
     }
     else{
