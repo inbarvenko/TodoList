@@ -1,5 +1,3 @@
-// -- не сохраняется состояние фильтра
-
 const selectFilter = document.getElementById('input_select');
 const containerList = document.getElementById('container__list');
 const textInput = document.getElementById('input_text');
