@@ -14,18 +14,18 @@ const render = () => {
   //  LocalStorage для сохранение инфы на локал сервере
   if (localStorage.getItem('todo')) {
     toDoList = JSON.parse(localStorage.getItem('todo'));
-    showToDo();
   };
   if(localStorage.getItem('filter')) {
     selectFilter.value = JSON.parse(localStorage.getItem('filter'));
     filterTasks();
+    currentTasks();
   }
 }
 
 const saveLocalStorage = () => {
   localStorage.setItem('todo', JSON.stringify(toDoList));
   localStorage.setItem('filter', JSON.stringify(selectFilter.value));
-}
+};
 
 render();
 
@@ -99,6 +99,7 @@ function completeTask (id) {
     }
   });
 
+  currentTasks();
   filterTasks();
 }
 
@@ -188,7 +189,7 @@ function showToDo() {
   currentTasks();
 }
 
-const showCompleted = () => {
+function showCompleted (){
   toDoList_Page.innerHTML = null;
 
   toDoList.forEach((item) => {
@@ -238,7 +239,7 @@ const showCompleted = () => {
   });
 }
 
-const showActive = () => {
+function showActive(){
   toDoList_Page.innerHTML = null;
 
   toDoList.forEach((item) => {
