@@ -17,9 +17,10 @@ const render = () => {
   };
   if(localStorage.getItem('filter')) {
     selectFilter.value = JSON.parse(localStorage.getItem('filter'));
-    filterTasks();
-    currentTasks();
   }
+
+  filterTasks();
+  currentTasks();
 }
 
 const saveLocalStorage = () => {
